@@ -1,0 +1,14 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy frontend files
+COPY frontend/ /app/
+
+# Install simple HTTP server
+RUN npm install -g http-server
+
+EXPOSE 3000
+
+# Serve on port 3000
+CMD ["http-server", "-p", "3000", "--cors"]

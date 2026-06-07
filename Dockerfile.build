@@ -1,0 +1,29 @@
+# Multi-stage build
+# Stage 1: Build with Maven
+FROM maven:latest AS builder
+
+WORKDIR /workspace
+
+# Copy entire project
+COPY . /workspace
+
+# Build the project
+RUN mvn clean package -q -DskipTests
+
+# Stage 2: Run with Java
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+# Copy the JAR from builder
+COPY --from=builder /workspace/target/hms-1.0.0.jar hms-app.jar
+
+EXPOSE 8080
+
+ENV SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hospital_management_system
+ENV SPRING_DATASOURCE_USERNAME=hms_user
+ENV SPRING_DATASOURCE_PASSWORD=hms_password
+ENV JWT_SECRET=mySecretKeyForJWTTokenSigningThatIsLongEnoughFor512BitHS512Algorithm2024
+ENV JWT_EXPIRATION=86400000
+
+ENTRYPOINT ["java", "-jar", "hms-app.jar"]
